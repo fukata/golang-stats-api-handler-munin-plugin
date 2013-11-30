@@ -1,0 +1,103 @@
+#!/usr/bin/env perl
+# -*- cperl -*-
+
+=head1 NAME
+
+golang_stats_ - Goblin stats value
+
+=head1 APPLICABLE SYSTEMS
+
+=head1 CONFIGURATION
+
+This shows the default configuration of this plugin.  You can override
+the stats URL.
+
+  [golang_stats_*]
+      env.stats_api_url http://localhost:8080/api/stats/
+
+=head1 MAGIC MARKERS
+
+  #%# family=auto
+  #%# capabilities=autoconf
+
+=head1 VERSION
+
+  0.0.1 
+
+=head1 BUGS
+
+None known
+
+=head1 AUTHOR
+
+Tatsuya Fukata <tatsuya.fukata@gmail.com>
+
+=head1 LICENSE
+
+Apache License 2.0
+
+=cut
+
+use strict;
+use warnings;
+use Munin::Plugin;
+
+my $ret = undef;
+if (! eval "require LWP::UserAgent;"){
+    $ret = "LWP::UserAgent not found";
+}
+if (! eval "require JSON;") {
+    $ret = "JSON not found";
+}
+unless ( $0 =~ /golang_stats_(.+)/ ) {
+    $ret = "item name not found";
+}
+if ($ret){
+    print "no ($ret)\n";
+    exit 0;
+}
+
+my $URL = exists $ENV{stats_api_url} ? $ENV{stats_api_url} : "http://localhost:8080/api/stats/";
+my $item = $1;
+
+if ( exists $ARGV[0] and $ARGV[0] eq "autoconf" ) {
+    my $ua = LWP::UserAgent->new(
+        timeout => 30,
+        agent => sprintf("munin/%s (libwww-perl/%s)", $Munin::Common::Defaults::MUNIN_VERSION, $LWP::VERSION)
+    );
+    my $response = $ua->request(HTTP::Request->new('GET',$URL));
+
+    unless ($response->is_success) {
+        print "no (no golang stats on $URL)\n";
+        exit 0;
+    } else {
+        print "yes\n";
+        exit 0;
+    }
+}
+
+if ( exists $ARGV[0] and $ARGV[0] eq "config" ) {
+    print "graph_title $item\n";
+    print "graph_args --base 1000\n";
+    print "graph_category golang\n";
+    print "graph_vlabel $item\n";
+
+    print "total.label $item\n";
+    print "total.info  $item\n";
+    print "total.draw LINE2\n";
+
+    exit 0;
+}
+
+my $ua = LWP::UserAgent->new(
+    timeout => 30,
+    agent => sprintf("munin/%s (libwww-perl/%s)", $Munin::Common::Defaults::MUNIN_VERSION, $LWP::VERSION)
+);
+
+my $response = $ua->request(HTTP::Request->new('GET',$URL));
+my $json     = JSON::decode_json($response->decoded_content);
+if ( defined $json->{$item} ) {
+    print "total.value " . $json->{$item} . "\n";
+} else {
+    print "total.value U\n";
+}
