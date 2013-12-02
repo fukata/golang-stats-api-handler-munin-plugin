@@ -13,7 +13,7 @@ This shows the default configuration of this plugin.  You can override
 the stats URL.
 
   [golang_stats_*]
-      env.stats_api_url http://localhost:8080/api/stats/
+      env.stats_api_url http://localhost:8080/api/stats
 
 =head1 MAGIC MARKERS
 
@@ -57,7 +57,7 @@ if ($ret){
     exit 0;
 }
 
-my $URL = exists $ENV{stats_api_url} ? $ENV{stats_api_url} : "http://localhost:8080/api/stats/";
+my $URL = exists $ENV{stats_api_url} ? $ENV{stats_api_url} : "http://localhost:8080/api/stats";
 my $item = $1;
 
 if ( exists $ARGV[0] and $ARGV[0] eq "autoconf" ) {
