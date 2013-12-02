@@ -6,7 +6,7 @@ Munin plugin of [golang-stats-api-handler](https://github.com/fukata/golang-stat
 ## Install
 
     sudo cp golang_stats_ /usr/share/munin/plugins/
-    sudo cp golang_stats.conf /etc/munin/plugin-conf.d/
+    sudo cp conf.d/golang_stats_ /etc/munin/plugin-conf.d/
 
 ## Symbolic Link
 
